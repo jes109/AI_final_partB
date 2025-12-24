@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SVM 視覺化互動學習平台</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;700&display=swap');
+        body { font-family: 'Noto Sans TC', sans-serif; background-color: #f8fafc; scroll-behavior: smooth; }
+        .canvas-container { position: relative; width: 100%; max-width: 650px; aspect-ratio: 1 / 1; background: white; border-radius: 12px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); overflow: hidden; border: 1px solid #e2e8f0; }
+        canvas { position: absolute; top: 0; left: 0; cursor: crosshair; }
+        .section-divider { border-top: 2px dashed #e2e8f0; margin: 4rem 0; }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <!-- 最上方資訊列 -->
+    <div class="max-w-6xl mx-auto mb-4 flex justify-end">
+        <div class="text-slate-500 text-sm font-medium border-b border-slate-200 pb-1 w-full text-right">
+            蔡佳軒
+        </div>
+    </div>
+
+    <div class="max-w-6xl mx-auto">
+        
+        <!-- 第一區：SVM 知識介紹 -->
+        <section id="introduction" class="mb-16">
+            <header class="mb-10 text-center">
+                <h1 class="text-4xl font-bold text-slate-800 mb-4">SVM 支持向量機互動教學</h1>
+                <p class="text-slate-600">透過理論與實踐，直覺理解機器學習最強大的分類演算法</p>
+            </header>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- 基礎介紹 -->
+                <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-200">
+                    <h2 class="text-2xl font-bold text-slate-800 mb-4 flex items-center gap-2">
+                        <span class="bg-blue-500 w-2 h-8 rounded-full"></span>
+                        什麼是 SVM?
+                    </h2>
+                    <p class="text-slate-700 leading-relaxed mb-4">
+                        支持向量機 (Support Vector Machine) 是一種監督式學習模型。它的目標是在特徵空間中尋找一個**「最優超平面」(Optimal Hyperplane)**，將不同類別的數據進行完美的區分。
+                    </p>
+                    <div class="bg-blue-50 p-4 rounded-xl border-l-4 border-blue-500 mb-4">
+                        <h4 class="font-bold text-blue-800 text-sm">核心目標：最大化邊際 (Margin)</h4>
+                        <p class="text-xs text-blue-700 mt-1">SVM 不僅僅是把點分開，它更追求讓分類邊界距離最近的數據點（支持向量）越遠越好，這能顯著提升模型的泛化能力。</p>
+                    </div>
+                    <ul class="space-y-3 text-sm text-slate-600">
+                        <li class="flex items-center gap-2">📌 <strong>支持向量：</strong> 決定超平面位置的關鍵數據點。</li>
+                        <li class="flex items-center gap-2">📌 <strong>核技巧 (Kernel Trick)：</strong> 將低維數據投影至高維，解決線性不可分問題。</li>
+                    </ul>
+                </div>
+
+                <!-- 數學原理 -->
+                <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-200">
+                    <h2 class="text-2xl font-bold text-slate-800 mb-4 flex items-center gap-2">
+                        <span class="bg-indigo-500 w-2 h-8 rounded-full"></span>
+                        數學核心
+                    </h2>
+                    <p class="text-sm text-slate-600 mb-4">定義超平面方程為：</p>
+                    <div class="bg-slate-50 p-3 rounded-lg text-center font-serif italic mb-4">
+                        $$ w \cdot x + b = 0 $$
+                    </div>
+                    <p class="text-sm text-slate-600 mb-2">最佳化問題轉化為最小化：</p>
+                    <div class="bg-slate-50 p-3 rounded-lg text-center mb-4">
+                        $$ \min \frac{1}{2}||w||^2 + C \sum_{i=1}^{n} \xi_i $$
+                    </div>
+                    <p class="text-xs text-slate-500 italic leading-relaxed">
+                        其中 $C$ 參數權衡了「邊際寬度」與「容許錯誤」的程度。$C$ 越大，模型對錯誤越敏感。
+                    </p>
+                </div>
+            </div>
+
+            <!-- 向下滾動提示 -->
+            <div class="mt-12 text-center">
+                <a href="#interactive" class="inline-flex flex-col items-center text-blue-500 hover:text-blue-600 transition">
+                    <span class="text-sm font-bold mb-2">準備好了嗎？開始互動體驗</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 animate-bounce" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                    </svg>
+                </a>
+            </div>
+        </section>
+
+        <div class="section-divider"></div>
+
+        <!-- 第二區：互動模擬工具 -->
+        <section id="interactive" class="py-8">
+            <h2 class="text-3xl font-bold text-slate-800 mb-8 text-center">互動實驗室</h2>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                
+                <!-- 控制面板 -->
+                <div class="lg:col-span-4 space-y-6 order-2 lg:order-1">
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                        <h3 class="text-lg font-bold mb-4 flex items-center gap-2">
+                            ⚙️ 參數調校
+                        </h3>
+                        
+                        <div class="space-y-6">
+                            <!-- C 參數 -->
+                            <div>
+                                <div class="flex justify-between mb-2">
+                                    <label class="text-sm font-medium text-slate-700">正規化參數 (C)</label>
+                                    <span id="cValueDisplay" class="text-blue-600 font-bold">1.0</span>
+                                </div>
+                                <input type="range" id="cSlider" min="-2" max="3" step="0.1" value="0" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600" oninput="updateParams()">
+                                <p class="text-[10px] text-slate-400 mt-2">控制分類精準度與邊際寬度的平衡。</p>
+                            </div>
+
+                            <!-- 核函數 -->
+                            <div>
+                                <label class="text-sm font-medium text-slate-700 block mb-2">核函數 (Kernel)</label>
+                                <select id="kernelSelect" class="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm" onchange="updateParams()">
+                                    <option value="linear">線性核 (Linear)</option>
+                                    <option value="rbf">徑向基底核 (RBF / Gaussian)</option>
+                                </select>
+                            </div>
+
+                            <!-- Gamma 參數 -->
+                            <div id="gammaControl" class="hidden">
+                                <div class="flex justify-between mb-2">
+                                    <label class="text-sm font-medium text-slate-700">RBF Gamma ($\gamma$)</label>
+                                    <span id="gammaValueDisplay" class="text-blue-600 font-bold">0.1</span>
+                                </div>
+                                <input type="range" id="gammaSlider" min="-3" max="1" step="0.1" value="-1" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600" oninput="updateParams()">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 操作指南 -->
+                    <div class="bg-slate-800 text-slate-200 p-6 rounded-2xl shadow-lg">
+                        <h3 class="font-bold mb-3 flex items-center gap-2">💡 操作提示</h3>
+                        <ul class="text-xs space-y-3 leading-loose opacity-90">
+                            <li>• <strong>滑鼠點擊：</strong> 在畫布上放置數據點</li>
+                            <li>• <strong>空白鍵：</strong> 切換當前類別 (紅/藍)</li>
+                            <li>• <strong>觀察虛線：</strong> 圈住的點即為「支持向量」</li>
+                            <li>• <strong>漸層色彩：</strong> 色彩越深，分類信心程度越高</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- 畫布區塊 -->
+                <div class="lg:col-span-8 flex flex-col items-center order-1 lg:order-2">
+                    <div class="canvas-container">
+                        <canvas id="gridCanvas"></canvas>
+                        <canvas id="pointCanvas"></canvas>
+                    </div>
+
+                    <div class="mt-6 flex gap-4 w-full max-w-[650px]">
+                        <button onclick="clearCanvas()" class="flex-1 py-3 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl transition font-medium shadow-sm">
+                            清除所有數據
+                        </button>
+                        <div class="flex-[1.5] flex items-center justify-between bg-white px-6 py-3 rounded-xl border border-slate-200 shadow-sm">
+                            <span class="text-sm font-medium text-slate-500">當前繪製類別:</span>
+                            <div class="flex items-center gap-3">
+                                <div id="classIndicator" class="w-4 h-4 rounded-full bg-red-500 ring-4 ring-red-100"></div>
+                                <span id="className" class="text-sm font-bold text-red-600">類別 A</span>
+                                <button onclick="toggleLabel()" class="text-[10px] bg-slate-100 px-2 py-1 rounded hover:bg-slate-200">切換</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Footer Info -->
+        <footer class="mt-24 pb-8 text-center text-slate-400 text-xs border-t border-slate-100 pt-8">
+            <p>© 2025 SVM Interactive Learning Module | 搭載高效 SMO 求解器</p>
+        </footer>
+    </div>
+
+    <!-- SVM Logic Script -->
+    <script>
+        // --- 核心 SVM 類別 (SMO 實現) ---
+        class SVM {
+            constructor(kernel = 'linear', C = 1.0, gamma = 0.1) {
+                this.C = C;
+                this.gamma = gamma;
+                this.kernelType = kernel;
+                this.alpha = [];
+                this.b = 0;
+                this.points = [];
+                this.labels = [];
+                this.eps = 1e-3;
+            }
+
+            kernel(x1, x2) {
+                if (this.kernelType === 'linear') {
+                    return x1[0] * x2[0] + x1[1] * x2[1];
+                } else if (this.kernelType === 'rbf') {
+                    const dist = Math.pow(x1[0] - x2[0], 2) + Math.pow(x1[1] - x2[1], 2);
+                    return Math.exp(-this.gamma * dist);
+                }
+                return 0;
+            }
+
+            train(data, labels, iterations = 60) {
+                this.points = data;
+                this.labels = labels;
+                const n = data.length;
+                this.alpha = new Array(n).fill(0);
+                this.b = 0;
+
+                for (let iter = 0; iter < iterations; iter++) {
+                    let numChanged = 0;
+                    for (let i = 0; i < n; i++) {
+                        const Ei = this.predict(data[i]) - labels[i];
+                        if ((labels[i] * Ei < -this.eps && this.alpha[i] < this.C) || 
+                            (labels[i] * Ei > this.eps && this.alpha[i] > 0)) {
+                            
+                            let j = Math.floor(Math.random() * (n - 1));
+                            if (j >= i) j++;
+                            
+                            const Ej = this.predict(data[j]) - labels[j];
+                            const aiOld = this.alpha[i];
+                            const ajOld = this.alpha[j];
+
+                            let L, H;
+                            if (labels[i] !== labels[j]) {
+                                L = Math.max(0, ajOld - aiOld);
+                                H = Math.min(this.C, this.C + ajOld - aiOld);
+                            } else {
+                                L = Math.max(0, aiOld + ajOld - this.C);
+                                H = Math.min(this.C, aiOld + ajOld);
+                            }
+
+                            if (L === H) continue;
+
+                            const kernelII = this.kernel(data[i], data[i]);
+                            const kernelJJ = this.kernel(data[j], data[j]);
+                            const kernelIJ = this.kernel(data[i], data[j]);
+                            const eta = 2 * kernelIJ - kernelII - kernelJJ;
+
+                            if (eta >= 0) continue;
+
+                            this.alpha[j] -= (labels[j] * (Ei - Ej)) / eta;
+                            this.alpha[j] = Math.min(H, Math.max(L, this.alpha[j]));
+
+                            if (Math.abs(this.alpha[j] - ajOld) < 1e-5) continue;
+
+                            this.alpha[i] += labels[i] * labels[j] * (ajOld - this.alpha[j]);
+
+                            const b1 = this.b - Ei - labels[i] * (this.alpha[i] - aiOld) * kernelII - 
+                                       labels[j] * (this.alpha[j] - ajOld) * kernelIJ;
+                            const b2 = this.b - Ej - labels[i] * (this.alpha[i] - aiOld) * kernelIJ - 
+                                       labels[j] * (this.alpha[j] - ajOld) * kernelJJ;
+
+                            if (this.alpha[i] > 0 && this.alpha[i] < this.C) this.b = b1;
+                            else if (this.alpha[j] > 0 && this.alpha[j] < this.C) this.b = b2;
+                            else this.b = (b1 + b2) / 2;
+
+                            numChanged++;
+                        }
+                    }
+                    if (numChanged === 0) break;
+                }
+            }
+
+            predict(x) {
+                let res = this.b;
+                for (let i = 0; i < this.points.length; i++) {
+                    res += this.alpha[i] * this.labels[i] * this.kernel(this.points[i], x);
+                }
+                return res;
+            }
+        }
+
+        // --- UI 控制與繪圖 ---
+        const gridCanvas = document.getElementById('gridCanvas');
+        const pointCanvas = document.getElementById('pointCanvas');
+        const gctx = gridCanvas.getContext('2d');
+        const pctx = pointCanvas.getContext('2d');
+        
+        let width, height;
+        let points = [];
+        let labels = [];
+        let currentLabel = 1;
+        let svmModel = null;
+
+        function initCanvas() {
+            const container = document.querySelector('.canvas-container');
+            width = container.offsetWidth;
+            height = container.offsetHeight;
+            gridCanvas.width = width;
+            gridCanvas.height = height;
+            pointCanvas.width = width;
+            pointCanvas.height = height;
+            drawPoints();
+        }
+
+        window.onload = initCanvas;
+        window.onresize = initCanvas;
+
+        pointCanvas.addEventListener('mousedown', (e) => {
+            const rect = pointCanvas.getBoundingClientRect();
+            const x = (e.clientX - rect.left) / width;
+            const y = (e.clientY - rect.top) / height;
+            points.push([x, y]);
+            labels.push(currentLabel);
+            trainAndDraw();
+        });
+
+        function toggleLabel() {
+            currentLabel *= -1;
+            const indicator = document.getElementById('classIndicator');
+            const name = document.getElementById('className');
+            if (currentLabel === 1) {
+                indicator.className = 'w-4 h-4 rounded-full bg-red-500 ring-4 ring-red-100';
+                name.innerText = '類別 A';
+                name.className = 'text-sm font-bold text-red-600';
+            } else {
+                indicator.className = 'w-4 h-4 rounded-full bg-blue-500 ring-4 ring-blue-100';
+                name.innerText = '類別 B';
+                name.className = 'text-sm font-bold text-blue-600';
+            }
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                toggleLabel();
+            }
+        });
+
+        function updateParams() {
+            const cExp = parseFloat(document.getElementById('cSlider').value);
+            const C = Math.pow(10, cExp);
+            document.getElementById('cValueDisplay').innerText = C.toFixed(2);
+
+            const kernel = document.getElementById('kernelSelect').value;
+            const gammaExp = parseFloat(document.getElementById('gammaSlider').value);
+            const gamma = Math.pow(10, gammaExp);
+            document.getElementById('gammaValueDisplay').innerText = gamma.toFixed(2);
+
+            const gammaControl = document.getElementById('gammaControl');
+            if (kernel === 'rbf') gammaControl.classList.remove('hidden');
+            else gammaControl.classList.add('hidden');
+
+            trainAndDraw();
+        }
+
+        function clearCanvas() {
+            points = [];
+            labels = [];
+            svmModel = null;
+            gctx.clearRect(0, 0, width, height);
+            pctx.clearRect(0, 0, width, height);
+            drawPoints();
+        }
+
+        function trainAndDraw() {
+            if (points.length < 2) {
+                drawPoints();
+                return;
+            }
+
+            const kernel = document.getElementById('kernelSelect').value;
+            const cExp = parseFloat(document.getElementById('cSlider').value);
+            const C = Math.pow(10, cExp);
+            const gammaExp = parseFloat(document.getElementById('gammaSlider').value);
+            const gamma = Math.pow(10, gammaExp);
+
+            svmModel = new SVM(kernel, C, gamma);
+            svmModel.train(points, labels);
+
+            drawDecisionBoundary();
+            drawPoints();
+        }
+
+        function drawDecisionBoundary() {
+            const step = 6;
+            gctx.clearRect(0, 0, width, height);
+
+            for (let x = 0; x < width; x += step) {
+                for (let y = 0; y < height; y += step) {
+                    const val = svmModel.predict([x / width, y / height]);
+                    
+                    if (val > 0) {
+                        gctx.fillStyle = `rgba(239, 68, 68, ${Math.min(0.15, val * 0.1)})`;
+                    } else {
+                        gctx.fillStyle = `rgba(59, 130, 246, ${Math.min(0.15, -val * 0.1)})`;
+                    }
+                    gctx.fillRect(x, y, step, step);
+
+                    if (Math.abs(val) < 0.08) {
+                        gctx.fillStyle = 'rgba(0,0,0,0.15)';
+                        gctx.fillRect(x, y, 2, 2);
+                    }
+                }
+            }
+        }
+
+        function drawPoints() {
+            pctx.clearRect(0, 0, width, height);
+            points.forEach((p, i) => {
+                const px = p[0] * width;
+                const py = p[1] * height;
+
+                pctx.beginPath();
+                pctx.arc(px, py, 6, 0, Math.PI * 2);
+                pctx.fillStyle = labels[i] === 1 ? '#ef4444' : '#3b82f6';
+                pctx.fill();
+                pctx.strokeStyle = 'white';
+                pctx.lineWidth = 2;
+                pctx.stroke();
+
+                if (svmModel && svmModel.alpha[i] > 0.005) {
+                    pctx.beginPath();
+                    pctx.arc(px, py, 10, 0, Math.PI * 2);
+                    pctx.strokeStyle = 'rgba(0,0,0,0.2)';
+                    pctx.setLineDash([3, 3]);
+                    pctx.stroke();
+                    pctx.setLineDash([]);
+                }
+            });
+        }
+    </script>
+</body>
+</html>
